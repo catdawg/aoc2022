@@ -3,49 +3,6 @@ use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 
-struct CalorieParserHelper<'a> {
-	buf: String,
-	buf_reader: BufReader<&'a File>,
-}
-
-impl<'a> Iterator for CalorieParserHelper<'a> {
-	type Item = u32;
-
-	fn next(&mut self) -> Option<u32> {
-
-		let mut calorie_accumulator = 0;
-		loop {
-			self.buf.clear();
-			let bytes_read = self.buf_reader.read_line(&mut self.buf).expect("failed to read from input");
-			if bytes_read == 0 {
-				if calorie_accumulator > 0 {
-					break
-				} else {
-					return None;
-				}
-			}
-
-			let trimmed_buf = self.buf.trim();
-			if trimmed_buf.is_empty() {
-				break
-			}
-			let num: u32 = trimmed_buf.parse().expect("input contained invalid number");
-
-			calorie_accumulator += num
-		}
-
-		return Some(calorie_accumulator)
-	}
-
-}
-
-fn prepare_parser(file: &File) -> CalorieParserHelper {
-	let buf_reader = BufReader::new(file);
-	let buf = String::new();
-
-	CalorieParserHelper {buf, buf_reader}
-}
-
 fn main() {
 	let args: Vec<String> = env::args().collect();
 
@@ -53,26 +10,54 @@ fn main() {
 
 	let file = File::open(file_path).expect("Should have been able to read the file");
 
-	let parser = prepare_parser(&file);
-
+	let mut accumulator = 0;
 	let mut max_calories: [u32; 4] = [0, 0, 0, 0];
+	
+	enum LineType {
+		Calorie(u32),
+		NewLine,
+	}
 
-	for calorie in parser {
-		max_calories[3] = calorie;
+	let now = std::time::Instant::now();
 
-		let mut i = 2;
-		while max_calories[i] < calorie {
-			max_calories[i + 1] = max_calories[i];
-			max_calories[i] = calorie;
+	BufReader::new(file).lines().map(|v| -> LineType {
+		let line = v.expect("failed to read from input");
 
-			if i == 0 {
+		if line.is_empty() {
+			LineType::NewLine
+		} else {
+			let calorie = line.parse().expect("input contained invalid number");
+			LineType::Calorie(calorie)
+		}
+
+	}).filter_map(|line| match line {
+		LineType::NewLine => {
+			if accumulator > 0 {
+				let elf_value = accumulator;
+				accumulator = 0;
+				Some(elf_value)
+			} else {
+				None
+			}
+		},
+		LineType::Calorie(calorie) => {
+			accumulator = accumulator + calorie;
+			None
+		}
+	}).for_each(|calories_per_elf| {
+		for i in (0..3).rev() {
+			if max_calories[i] >= calories_per_elf {
 				break
 			}
 
-			i = i - 1;
+			max_calories[i + 1] = max_calories[i];
+			max_calories[i] = calories_per_elf;
 		}
-	}
+	});
+	
+	let elapsed = now.elapsed();
+	println!("Elapsed: {:.2?}", elapsed);
 
 	let top_three = max_calories[0] + max_calories[1] + max_calories[2];
-	println!("top_three:\n{top_three}");
+	println!("Result: {top_three}");
 }
