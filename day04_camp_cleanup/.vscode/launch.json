@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'day04_camp_cleanup'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=day04_camp_cleanup",
+                    "--package=day04_camp_cleanup"
+                ],
+                "filter": {
+                    "name": "day04_camp_cleanup",
+                    "kind": "bin"
+                }
+            },
+            "args": ["res/input.txt"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'day04_camp_cleanup'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=day04_camp_cleanup",
+                    "--package=day04_camp_cleanup"
+                ],
+                "filter": {
+                    "name": "day04_camp_cleanup",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
