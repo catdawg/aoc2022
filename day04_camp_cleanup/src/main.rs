@@ -38,65 +38,6 @@ fn main() {
 			},
 			Err(_) => accumulator
 		}
-
-		/* 
-
-		match res {
-			Ok(v) => {
-				
-				let mut priority_of_shared_item_type = 0;
-				match elf {
-					Elf::First => {
-						for c in v.chars() {
-
-							let priority = get_priority(c);
-							set[priority as usize] = RucksackPresence::PresentInFirst;
-						}
-					},
-					Elf::Second => {
-						for c in v.chars() {
-
-							let priority = get_priority(c);
-
-							match set[priority as usize] {
-								RucksackPresence::PresentInFirst => {
-									set[priority as usize] = RucksackPresence::PresentInFirstAndSecond
-								},
-								_ => {}					
-							};
-						}
-					},
-					Elf::Third => {
-						for c in v.chars() {
-
-							let priority = get_priority(c);
-
-							match set[priority as usize] {
-								RucksackPresence::PresentInFirstAndSecond => {
-									priority_of_shared_item_type = priority;
-									break;
-								},
-								_ => {}					
-							};
-						}
-					},
-				};
-
-				let new_elf = match elf {
-					Elf::First => Elf::Second,
-					Elf::Second => Elf::Third,
-					Elf::Third => Elf::First,
-				};
-
-				match new_elf {
-					Elf::First => set.fill(RucksackPresence::NotPresent),
-					_ => {}
-				};
-
-				(new_elf, accumulator + priority_of_shared_item_type)
-			},
-			Err(_) => (elf, accumulator)
-		} */
 	});
 	
 	let elapsed = now.elapsed();
