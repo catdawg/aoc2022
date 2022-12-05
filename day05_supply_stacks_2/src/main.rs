@@ -21,11 +21,8 @@ fn main() {
 			break; // reached end of initial stack state
 		}
 		for (stack_index, crate_in_stack) in line.as_bytes().chunks(4).enumerate() {
-			match (crate_in_stack[0] as char, crate_in_stack[1] as char, crate_in_stack[2] as char) {
-				(' ', ' ', _) => {
-
-				},
-				('[', crate_name, _) => {
+			match (crate_in_stack[0] as char, crate_in_stack[1] as char) {
+				('[', crate_name) => {
 					let current_stack_size = stacks.len();
 
 					if stack_index + 1 > current_stack_size {
