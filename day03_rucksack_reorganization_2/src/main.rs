@@ -1,14 +1,13 @@
 use std::env;
-use std::fs::File;
-use std::io::BufRead;
-use std::io::BufReader;
+use std::fs::read_to_string;
+use std::iter::zip;
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
 
 	let file_path = &args[1];
 
-	let file = File::open(file_path).expect("Should have been able to read the file");
+	let input = read_to_string(file_path).unwrap();
 
 	let now = std::time::Instant::now();
 
@@ -26,74 +25,57 @@ fn main() {
 		PresentInFirst,
 		PresentInFirstAndSecond
 	}
-	
-	#[derive(Copy, Clone)]
-	enum Elf {
-		First,
-		Second,
-		Third
-	}
 
 	let mut set = [RucksackPresence::NotPresent; 27 * 2];
-	let (_, res) = BufReader::new(file).lines().fold((Elf::First, 0), |(elf, accumulator), res| {
+	let res = 
+		zip(
+			input.lines().step_by(3),
+			zip(
+				input.lines().skip(1).step_by(3),
+				input.lines().skip(2).step_by(3)
+			)
+		).fold(
+			0, |accumulator, (elf1, (elf2, elf3))| {
 
-		match res {
-			Ok(v) => {
 				
 				let mut priority_of_shared_item_type = 0;
-				match elf {
-					Elf::First => {
-						for c in v.chars() {
+				for c in elf1.chars() {
 
-							let priority = get_priority(c);
-							set[priority as usize] = RucksackPresence::PresentInFirst;
-						}
-					},
-					Elf::Second => {
-						for c in v.chars() {
+					let priority = get_priority(c);
+					set[priority as usize] = RucksackPresence::PresentInFirst;
+				}
+				
+				for c in elf2.chars() {
 
-							let priority = get_priority(c);
 
-							match set[priority as usize] {
-								RucksackPresence::PresentInFirst => {
-									set[priority as usize] = RucksackPresence::PresentInFirstAndSecond
-								},
-								_ => {}					
-							};
-						}
-					},
-					Elf::Third => {
-						for c in v.chars() {
+					let priority = get_priority(c);
 
-							let priority = get_priority(c);
+					match set[priority as usize] {
+						RucksackPresence::PresentInFirst => {
+							set[priority as usize] = RucksackPresence::PresentInFirstAndSecond
+						},
+						_ => {}					
+					};
+				}
+				
+				for c in elf3.chars() {
 
-							match set[priority as usize] {
-								RucksackPresence::PresentInFirstAndSecond => {
-									priority_of_shared_item_type = priority;
-									break;
-								},
-								_ => {}					
-							};
-						}
-					},
-				};
+					let priority = get_priority(c);
 
-				let new_elf = match elf {
-					Elf::First => Elf::Second,
-					Elf::Second => Elf::Third,
-					Elf::Third => Elf::First,
-				};
+					match set[priority as usize] {
+						RucksackPresence::PresentInFirstAndSecond => {
+							priority_of_shared_item_type = priority;
+							break;
+						},
+						_ => {}					
+					};
+				}
 
-				match new_elf {
-					Elf::First => set.fill(RucksackPresence::NotPresent),
-					_ => {}
-				};
+				set.fill(RucksackPresence::NotPresent);
 
-				(new_elf, accumulator + priority_of_shared_item_type)
-			},
-			Err(_) => (elf, accumulator)
-		}
-	});
+				accumulator + priority_of_shared_item_type
+			}
+		);
 	
 	let elapsed = now.elapsed();
 	println!("Elapsed: {:.2?}", elapsed);
