@@ -1,14 +1,12 @@
 use std::env;
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Read;
+use std::fs;
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
 
 	let file_path = &args[1];
 
-	let file = File::open(file_path).expect("Should have been able to read the file");
+	let file = fs::read_to_string(file_path).unwrap();
 
 	let now = std::time::Instant::now();
 
@@ -46,20 +44,15 @@ fn main() {
 		}
 	}
 
-	let (_, res) = BufReader::new(file).bytes().fold((Move::Rock, 0), |state, res| {
+	let (_, res) = file.chars().fold((Move::Rock, 0), |state, res| {
 		match res {
-			Ok(v) => {	
-				match v as char {
-					'A' => (Move::Rock, state.1),
-					'B' => (Move::Paper, state.1),
-					'C' => (Move::Scissors, state.1),
-					'X' => (state.0, state.1 + score(state.0, Outcome::Lose)),
-					'Y' => (state.0, state.1 + score(state.0, Outcome::Draw)),
-					'Z' => (state.0, state.1 + score(state.0, Outcome::Win)),
-					_ => state
-				}
-			},
-			Err(_) => state
+			'A' => (Move::Rock, state.1),
+			'B' => (Move::Paper, state.1),
+			'C' => (Move::Scissors, state.1),
+			'X' => (state.0, state.1 + score(state.0, Outcome::Lose)),
+			'Y' => (state.0, state.1 + score(state.0, Outcome::Draw)),
+			'Z' => (state.0, state.1 + score(state.0, Outcome::Win)),
+			_ => state
 		}
 	});
 	
