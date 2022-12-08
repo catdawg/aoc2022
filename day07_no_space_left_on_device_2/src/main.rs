@@ -104,16 +104,16 @@ fn main() {
 
 	let minimum_needed = 30000000 - (70000000 - total_used_space);
 
-	let mut candidate: u32 = u32::MAX;
-
-	for dir in file_tree.iter() {
-		if  dir.size >= minimum_needed {
-			candidate = cmp::min(candidate, dir.size);
-		} 
-	}
+	let res = file_tree.iter().fold(u32::MAX, |res, dir| {
+		if dir.size >= minimum_needed {
+			cmp::min(res, dir.size)
+		} else {
+			res
+		}
+	});
 
 	let elapsed = now.elapsed();
 	println!("Elapsed: {:.2?}", elapsed);
 
-	println!("Result: {candidate}");
+	println!("Result: {res}");
 }
